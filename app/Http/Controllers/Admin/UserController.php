@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -108,8 +109,6 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-
-
         $order = Order::where('userID', $user->userID)
             ->whereIn('status', ['Pending', 'Confirmed', 'Shipping'])
             ->first();
@@ -121,8 +120,8 @@ class UserController extends Controller
             return back()->with('error', 'Bạn không thể xóa tài khoản của chính mình.');
         }
 
-        if ($user->role === 'Admin' || $user->role === 'Owner') {
-            return back()->with('error', 'Không thể xóa tài khoản Admin.');
+        if ($user->role !== "Customer") {
+            return back()->with('error', 'Không thể xóa tài khoản nhân viên.');
         }
 
         $name = $user->fullName;

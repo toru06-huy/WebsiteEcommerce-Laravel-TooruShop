@@ -305,7 +305,7 @@
                 <div class="form-grid" style="gap:16px;margin-bottom:20px;">
                     <div class="form-group">
                         <label>Mã nhân viên</label>
-                        <input type="text" name="employeeCode" id="edit-code" class="form-control" required>
+                        <input type="text" name="employeeCode" id="edit-code" class="form-control" required readonly>
                     </div>
                     <div class="form-group">
                         <label>Chức vụ</label>

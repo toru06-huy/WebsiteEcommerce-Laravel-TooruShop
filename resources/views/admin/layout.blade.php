@@ -548,9 +548,8 @@
             </svg>
             Dashboard
         </a>
-
+<div class="nav-section">Catalogue</div>
         @if(in_array(Auth::user()->role, ['Admin', 'Owner']))
-        <div class="nav-section">Catalogue</div>
         <a href="{{ route('admin.categories.index') }}"
            class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -558,14 +557,7 @@
             </svg>
             Danh mục
         </a>
-        <a href="{{ route('admin.products.index') }}"
-           class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-                <line x1="7" y1="7" x2="7.01" y2="7"/>
-            </svg>
-            Sản phẩm
-        </a>
+        
         <a href="{{ route('admin.manufacturers.index') }}"
            class="nav-item {{ request()->routeIs('admin.manufacturers.*') ? 'active' : '' }}">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -576,7 +568,14 @@
         </a>
 
         @endif
-
+<a href="{{ route('admin.products.index') }}"
+           class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            Sản phẩm
+        </a>
         <div class="nav-section">Vận hành</div>
         <a href="{{ route('admin.orders.index') }}"
            class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">

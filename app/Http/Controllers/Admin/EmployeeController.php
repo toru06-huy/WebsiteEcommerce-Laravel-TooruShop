@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\Order;
 use App\Models\Position;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class EmployeeController extends Controller
         $user     = $employee->user;
         $address  = $user->addresses->first();
 
-        $processedOrders = \App\Models\Order::where('processedBy', $employee->employeeID)
+        $processedOrders = Order::where('processedBy', $employee->employeeID)
             ->selectRaw('status, COUNT(*) as cnt')
             ->groupBy('status')
             ->get()

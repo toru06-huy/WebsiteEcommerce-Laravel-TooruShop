@@ -90,11 +90,11 @@
         <h2>Danh sách sản phẩm ({{ $products->total() }})</h2>
         <div class="table-actions">
             <form method="GET" action="{{ route('admin.products.index') }}" style="display:flex;gap:8px;">
-                <select name="category" class="form-control" style="padding:8px 12px;font-size:13px;">
+                 <select name="category" class="form-control" style="padding:8px 12px;font-size:13px;">
                     <option value="">Tất cả danh mục</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->categoryID }}" {{ request('category') == $cat->categoryID ? 'selected' : '' }}>
-                            {{ $cat->categoryName }}
+                            {{ $cat->display_name }}
                         </option>
                     @endforeach
                 </select>

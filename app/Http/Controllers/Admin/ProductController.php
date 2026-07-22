@@ -30,7 +30,10 @@ class ProductController extends Controller
         }
 
         $products   = $query->latest()->paginate(15)->withQueryString();
-        $categories = Category::orderBy('categoryName')->get();
+        $categories = Category::doesntHave('children')
+            ->with('parentRecursive')
+            ->orderBy('categoryName')
+            ->get();
 
         return view('admin.products.index', compact('products', 'categories'));
     }

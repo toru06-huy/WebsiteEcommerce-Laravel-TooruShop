@@ -46,13 +46,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
           Route::get('orders/{id}/detail',    [OrderController::class, 'detail'])->name('orders.detail');
           Route::patch('orders/{id}/status', [OrderController::class, 'updateStatus'])
                ->name('orders.updateStatus');
-          Route::patch('orders/{id}/cancel', [OrderController::class, 'cancel'])
-               ->name('orders.cancel');
           Route::patch('orders/{id}/advance', [OrderController::class, 'advance'])
                ->name('orders.advance');
-
+          Route::get('products', [ProductController::class,'index'])->name('products.index');
           Route::middleware('owner')->group(function () {
-
+               Route::patch('orders/{id}/cancel', [OrderController::class, 'cancel'])
+                    ->name('orders.cancel');
                Route::resource('categories', CategoryController::class)
                     ->only(['index', 'store', 'update', 'destroy'])
                     ->parameters(['categories' => 'id']);
@@ -60,6 +59,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                Route::delete('products/images/{imageId}', [ProductController::class, 'deleteImage'])
                     ->name('products.deleteImage');
                Route::resource('products', ProductController::class)
+                    ->only(['store','update','destroy','create','edit'])
                     ->parameters(['products' => 'id']);
                Route::patch('products/{id}/restock', [ProductController::class, 'restock'])
                     ->name('products.restock');
@@ -98,7 +98,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('')->name('client.')->group(function () {
 
      Route::get('/', [HomeController::class, 'index'])->name('home');
-     
+
      Route::get('dang-nhap',  [ClientAuthController::class, 'showLogin'])->name('login');
      Route::post('dang-nhap', [ClientAuthController::class, 'login'])->name('login.post');
      Route::get('/register/verify', [ClientAuthController::class, 'showVerifyForm'])->name('register.verify');

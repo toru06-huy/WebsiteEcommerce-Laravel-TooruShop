@@ -343,7 +343,18 @@ function changeQty(delta) {
 async function addToCart() {
   if (!selectedVariantId) { alert('Vui lòng chọn màu sắc và kích cỡ.'); return; }
   const qty = parseInt(document.getElementById('qtyInput').value) || 1;
-
+  if (isNaN(qty) || qty < 1) {
+    showToast('Số lượng phải lớn hơn hoặc bằng 1.', 'error');
+    qtyInput.value = 1;
+    qtyInput.focus(); 
+    return;  
+  }
+  const max = parseInt(qtyInput.max) || 99;
+  if (qty > max) {
+    showToast(`Số lượng vượt quá tồn kho (Tối đa: ${max}).`, 'error');
+    qtyInput.value = max;
+    return;
+  }
   try {
     const r = await fetch('{{ route("client.cart.add") }}', {
       method: 'POST',

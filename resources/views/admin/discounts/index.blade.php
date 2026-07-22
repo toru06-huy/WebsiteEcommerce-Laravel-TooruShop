@@ -213,7 +213,7 @@
                 <div class="form-grid" style="gap:16px;">
                     <div class="form-group">
                         <label>Mã giảm giá</label>
-                        <input type="text" name="discountCode" id="edit-code" class="form-control" required style="text-transform:uppercase;">
+                        <input type="text" name="discountCode" id="edit-code" class="form-control" required style="text-transform:uppercase;" readonly>
                     </div>
                     <div class="form-group">
                         <label>Tên chương trình</label>

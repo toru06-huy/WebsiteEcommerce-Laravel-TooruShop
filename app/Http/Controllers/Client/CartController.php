@@ -25,8 +25,11 @@ class CartController extends Controller
         $request->validate([
             'variantID' => 'required|exists:product_variants,variantID',
             'quantity'  => 'required|integer|min:1',
+        ],[
+            'quantity.min' => 'Số lượng phải lớn hơn 0',
+            'quantity.integer' => 'Số lượng phải là số nguyên',
         ]);
-
+       
         $variant  = ProductVariant::findOrFail($request->variantID);
         $quantity = (int) $request->quantity;
 

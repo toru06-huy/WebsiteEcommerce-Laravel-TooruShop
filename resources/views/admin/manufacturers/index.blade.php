@@ -171,7 +171,7 @@
                 <div class="form-grid" style="gap:16px;">
                     <div class="form-group">
                         <label>Mã nhà cung cấp</label>
-                        <input type="text" name="manufacturerCode" id="edit-code" class="form-control" required>
+                        <input type="text" name="manufacturerCode" id="edit-code" class="form-control" required readonly>
                     </div>
                     <div class="form-group">
                         <label>Tên nhà cung cấp</label>
