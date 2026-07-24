@@ -85,6 +85,19 @@
 .related-info { padding: 10px 0 4px; }
 .related-name { font-size: 13px; color: var(--black); line-height: 1.4; }
 .related-price { font-size: 13px; color: var(--gold); margin-top: 4px; }
+
+/* Recently viewed */
+.viewed-section { padding: 60px 0; border-top: 1px solid var(--border); }
+.viewed-title { font-family: var(--font-display); font-size: 28px; font-weight: 300; margin-bottom: 28px; }
+.viewed-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+@media(max-width:768px){ .viewed-grid { grid-template-columns: repeat(2,1fr); } }
+.viewed-card { cursor: pointer; }
+.viewed-card:hover .vimg { transform: scale(1.04); }
+.viewed-img-wrap { overflow: hidden; aspect-ratio: 3/4; background: var(--cream); }
+.vimg { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+.viewed-info { padding: 10px 0 4px; }
+.viewed-name { font-size: 13px; color: var(--black); line-height: 1.4; }
+.viewed-price { font-size: 13px; color: var(--gold); margin-top: 4px; }
 </style>
 @endpush
 
@@ -246,6 +259,38 @@
                       <span style="color:#c0392b;">{{ number_format($rp->discounted_price,0,',','.')}}đ</span>
                   @else
                       {{ number_format($rp->basePrice,0,',','.')}}đ
+                  @endif
+              </div>
+            </div>
+          </div>
+        @endforeach
+      </div>
+    </div>
+  @endif
+
+  {{-- Recently viewed --}}
+  @if($viewProducts->isNotEmpty())
+    <div class="viewed-section">
+      <h2 class="viewed-title">Sản phẩm vừa xem</h2>
+      <div class="viewed-grid">
+        @foreach($viewProducts as $vp)
+          @php $vStock = $vp->variants->sum('stockQuantity'); @endphp
+          <div class="viewed-card" onclick="window.location='{{ route('client.product.show', $vp->productID) }}'">
+            <div class="viewed-img-wrap">
+              @if($vp->coverImage)
+                <img class="vimg" src="{{ asset('storage/'.$vp->coverImage->imageURL) }}" alt="{{ $vp->productName }}" style="{{ $vStock === 0 ? 'filter:grayscale(1)' : '' }}" loading="lazy">
+              @else
+                <div class="vimg" style="display:flex;align-items:center;justify-content:center;background:var(--cream);"><i class="fa-solid fa-shirt" style="font-size:36px;color:rgba(0,0,0,.1);"></i></div>
+              @endif
+            </div>
+            <div class="viewed-info">
+              <div class="viewed-name">{{ $vp->productName }}</div>
+              <div class="viewed-price">
+                  @if($vp->is_on_sale)
+                      <span style="text-decoration:line-through;color:#aaa;font-size:11px;margin-right:4px;">{{ number_format($vp->basePrice,0,',','.')}}đ</span>
+                      <span style="color:#c0392b;">{{ number_format($vp->discounted_price,0,',','.')}}đ</span>
+                  @else
+                      {{ number_format($vp->basePrice,0,',','.')}}đ
                   @endif
               </div>
             </div>
