@@ -29,6 +29,7 @@ Xin chào **{{ $order->name }}**,
 <div style="border-top: 1px solid #e5e5e5; padding-top: 15px; margin-top: 15px; text-align: right; font-size: 14px; line-height: 1.6;">
 Tạm tính: <strong>{{ number_format($order->totalAmount, 0, ',', '.') }}đ</strong><br>
 Giảm giá: <span style="color:#c0392b;">-{{ number_format($order->discountAmount, 0, ',', '.') }}đ</span><br>
+Tiền ship: <strong>{{ number_format($shippingFee, 0, ',', '.') }}đ</strong><br>
 Tổng thanh toán: <strong style="font-size: 18px; color: #bc9c6a;">{{ number_format($order->finalAmount, 0, ',', '.') }}đ</strong>
 </div>
 

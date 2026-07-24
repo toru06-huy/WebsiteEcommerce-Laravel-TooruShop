@@ -134,7 +134,8 @@ class OrderController extends Controller
         $discountID     = $discountData['discountID']     ?? null;
         $discountAmount = $discountData['discountAmount']  ?? 0;
         $finalAmount    = $discountData['finalAmount']     ?? $total;
-
+        $shippingFee = $finalAmount < 500000 ? 42000 : 0;
+        $finalAmount += $shippingFee;
         // Xây dựng chuỗi payment
         if ($request->payment_method === 'cod') {
             $paymentStr = 'Trả sau khi nhận';
@@ -152,9 +153,9 @@ class OrderController extends Controller
             $shippingInfo['district'],
             $shippingInfo['city'],
         ]);
-
+        $order = null;
         try {
-            DB::transaction(function () use ($user, $cartItems, $total, $discountID, $discountAmount, $finalAmount, $shippingAddress, $paymentStr, $shippingInfo) {
+            DB::transaction(function () use ($user, $cartItems, $total, $discountID, $discountAmount, $finalAmount, $shippingAddress, $paymentStr, $shippingInfo, &$order) {
 
                 $variantIds = collect($cartItems)->pluck('variantID')->toArray();
 
@@ -238,7 +239,7 @@ class OrderController extends Controller
                 try {
                     $targetEmail = $user?->email ?? ($shippingInfo['email'] ?? null);
                     if (!empty($targetEmail)) {
-                        Mail::to($targetEmail)->send(new OrderSuccessMail($order, $cartItems, $shippingInfo));
+                        Mail::to($targetEmail)->send(new OrderSuccessMail($order, $cartItems, $shippingInfo, $shippingFee));
                     }
                 } catch (\Exception $mailEx) {
                     logger('Không thể gửi email hóa đơn đơn hàng #' . $order->orderID . '. Lỗi: ' . $mailEx->getMessage());

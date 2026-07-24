@@ -15,15 +15,17 @@ class OrderSuccessMail extends Mailable
     public $order;
     public $cartItems;
     public $shippingInfo;
+    public $shippingFee;
 
     /**
      * Khởi tạo đối tượng Mail và gán dữ liệu đơn hàng
      */
-    public function __construct($order, $cartItems, $shippingInfo)
+    public function __construct($order, $cartItems, $shippingInfo, $shippingFee)
     {
         $this->order = $order;
         $this->cartItems = $cartItems;
         $this->shippingInfo = $shippingInfo;
+        $this->shippingFee = $shippingFee;
     }
 
     /**
