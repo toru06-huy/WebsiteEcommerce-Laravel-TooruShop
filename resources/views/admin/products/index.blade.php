@@ -80,6 +80,65 @@
         transition: border-color .2s;
     }
     .restock-qty-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,149,90,.1); }
+
+    .btn-restock-list {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 14px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px; font-weight: 500;
+        color: var(--ink);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: border-color .15s, background .15s;
+    }
+    .btn-restock-list:hover { border-color: var(--gold); background: rgba(184,149,90,.06); }
+
+    .rr-status-badge {
+        display: inline-block; padding: 3px 10px; border-radius: 20px;
+        font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .rr-status-pending            { background: #fff5f5; color: var(--danger); border: 1px solid rgba(192,57,43,.25); }
+    .rr-status-supplier-confirmed { background: #fff8ec; color: #b8730a; border: 1px solid rgba(184,115,10,.25); }
+    .rr-status-completed          { background: #eefaf0; color: #2e7d32; border: 1px solid rgba(46,125,50,.25); }
+    .rr-status-cancelled          { background: #f2f2f2; color: #666; border: 1px solid #ddd; }
+    .rr-cancel-reason { margin-top: 4px; font-size: 11.5px; color: var(--muted); font-style: italic; }
+
+    .rr-action-buttons { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+
+    .btn-receive-stock {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 4px 10px;
+        background: var(--gold);
+        border: none; border-radius: 4px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 11px; font-weight: 600;
+        color: #fff; cursor: pointer;
+        white-space: nowrap;
+    }
+    .btn-receive-stock:hover { background: #a3814c; }
+    .btn-receive-stock:disabled { opacity: .6; cursor: default; }
+
+    .btn-reject-stock {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 4px 10px;
+        background: #fff;
+        border: 1px solid rgba(192,57,43,.4); border-radius: 4px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 11px; font-weight: 600;
+        color: var(--danger); cursor: pointer;
+        white-space: nowrap;
+    }
+    .btn-reject-stock:hover { background: #fff5f5; }
+    .btn-reject-stock:disabled { opacity: .6; cursor: default; }
+
+    .rr-table { width: 100%; border-collapse: collapse; }
+    .rr-table th, .rr-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 12.5px; text-align: left; vertical-align: top; }
+    .rr-table th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+    .rr-items-list { display: flex; flex-direction: column; gap: 2px; }
+    .rr-empty { padding: 30px 0; text-align: center; color: var(--muted); font-size: 13px; }
 </style>
 @endpush
 
@@ -88,7 +147,14 @@
 <div class="table-card">
     <div class="table-head">
         <h2>Danh sách sản phẩm ({{ $products->total() }})</h2>
-        <div class="table-actions">
+        <div class="table-actions" style="display:flex;gap:10px;align-items:center;">
+            <button type="button" class="btn-restock-list" onclick="openRestockRequestsModal()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                Yêu cầu nhập hàng
+            </button>
             <form method="GET" action="{{ route('admin.products.index') }}" style="display:flex;gap:8px;">
                  <select name="category" class="form-control" style="padding:8px 12px;font-size:13px;">
                     <option value="">Tất cả danh mục</option>
@@ -320,6 +386,7 @@
             <div class="modal-body">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:16px;padding:10px 14px;background:rgba(184,149,90,.06);border-left:3px solid var(--gold);border-radius:2px;">
                     Nhập số lượng cần <strong>bổ sung thêm</strong> cho từng biến thể. Để trống hoặc nhập 0 nếu không nhập biến thể đó.
+                    Hệ thống sẽ gửi email cho nhà cung cấp. Tồn kho chỉ được cộng sau khi nhà cung cấp xác nhận VÀ nhân viên kiểm hàng xong, bấm "Xác nhận nhập kho" ở mục Yêu cầu nhập hàng.
                 </div>
                 <div style="display:flex;justify-content:space-between;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
                     <span style="font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Biến thể</span>
@@ -337,6 +404,72 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+{{-- ═══ MODAL DANH SÁCH YÊU CẦU NHẬP HÀNG ═══ --}}
+<div class="modal-overlay" id="modal-restock-requests">
+    <div class="modal" style="width:760px;max-width:92vw;">
+        <div class="modal-head">
+            <div>
+                <h3>Yêu cầu nhập hàng</h3>
+                <div style="font-size:13px;color:var(--muted);margin-top:2px;">
+                    Quy trình: Gửi yêu cầu → Nhà cung cấp xác nhận → Nhân viên kiểm hàng & xác nhận nhập kho chính thức.
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeModal('modal-restock-requests')">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" style="max-height:60vh;overflow-y:auto;">
+            <div id="rr-loading" style="padding:30px 0;text-align:center;color:var(--muted);font-size:13px;">Đang tải...</div>
+            <table class="rr-table" id="rr-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Nhà cung cấp</th>
+                        <th>Biến thể / SL</th>
+                        <th>Ngày yêu cầu</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="rr-tbody"></tbody>
+            </table>
+            <div class="rr-empty" id="rr-empty" style="display:none;">Chưa có yêu cầu nhập hàng nào.</div>
+        </div>
+        <div class="modal-foot">
+            <button type="button" class="topbar-btn secondary" onclick="closeModal('modal-restock-requests')">Đóng</button>
+        </div>
+    </div>
+</div>
+
+{{-- ═══ MODAL NHẬP LÝ DO TỪ CHỐI NHẬN HÀNG (nhân viên) ═══ --}}
+<div class="modal-overlay" id="modal-reject-reason">
+    <div class="modal" style="width:480px;max-width:92vw;">
+        <div class="modal-head">
+            <div>
+                <h3>Từ chối nhận hàng</h3>
+                <div style="font-size:13px;color:var(--muted);margin-top:2px;">
+                    Vui lòng nêu rõ lý do (hàng lỗi, sai số lượng, sai mẫu...). Lý do này sẽ được gửi email cho nhà cung cấp.
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeModal('modal-reject-reason')">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <textarea id="reject-reason-input" rows="4" placeholder="Nhập lý do từ chối nhận hàng..."
+                style="width:100%;padding:10px;border:1px solid var(--border);border-radius:4px;font-family:inherit;font-size:13.5px;resize:vertical;"></textarea>
+            <div id="reject-reason-error" style="display:none;color:var(--danger);font-size:12px;margin-top:6px;"></div>
+        </div>
+        <div class="modal-foot">
+            <button type="button" class="topbar-btn secondary" onclick="closeModal('modal-reject-reason')">Hủy</button>
+            <button type="button" class="topbar-btn" id="reject-reason-submit" onclick="submitRejectReason()">Gửi từ chối</button>
+        </div>
     </div>
 </div>
 
@@ -376,6 +509,175 @@ function openRestockModal(productId, productName, variants) {
     });
 
     openModal('modal-restock');
+}
+
+function openRestockRequestsModal() {
+    openModal('modal-restock-requests');
+    loadRestockRequests();
+}
+
+function loadRestockRequests() {
+    const loading = document.getElementById('rr-loading');
+    const table   = document.getElementById('rr-table');
+    const tbody   = document.getElementById('rr-tbody');
+    const empty   = document.getElementById('rr-empty');
+
+    loading.style.display = 'block';
+    table.style.display   = 'none';
+    empty.style.display   = 'none';
+
+    fetch('{{ route('admin.products.restockRequests') }}', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(res => res.json())
+        .then(data => {
+            loading.style.display = 'none';
+
+            if (!data.length) {
+                empty.style.display = 'block';
+                return;
+            }
+
+            tbody.innerHTML = data.map(r => {
+                const itemsHtml = r.items.map(i =>
+                    `<div>${i.label} <strong>× ${i.quantity}</strong></div>`
+                ).join('');
+
+                let statusHtml;
+                if (r.status === 'completed') {
+                    statusHtml = `<span class="rr-status-badge rr-status-completed">Đã nhập kho${r.receivedAt ? ' · ' + r.receivedAt : ''}</span>`;
+                } else if (r.status === 'cancelled') {
+                    const who = r.cancelledByType === 'staff' ? 'Nhân viên từ chối nhận hàng' : 'NCC từ chối yêu cầu';
+                    const reasonHtml = r.cancelReason ? `<div class="rr-cancel-reason">Lý do: ${r.cancelReason}</div>` : '';
+                    statusHtml = `
+                        <span class="rr-status-badge rr-status-cancelled">${who}${r.cancelledAt ? ' · ' + r.cancelledAt : ''}</span>
+                        ${reasonHtml}
+                    `;
+                } else if (r.status === 'supplier_confirmed') {
+                    statusHtml = `
+                        <span class="rr-status-badge rr-status-supplier-confirmed">NCC đã xác nhận${r.confirmedAt ? ' · ' + r.confirmedAt : ''}</span>
+                        <div class="rr-action-buttons">
+                            <button type="button" class="btn-receive-stock" onclick="confirmReceiveStock(${r.id}, this)">
+                                Xác nhận nhập kho
+                            </button>
+                            <button type="button" class="btn-reject-stock" onclick="openRejectReasonModal(${r.id}, this)">
+                                Từ chối nhận hàng
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    statusHtml = `<span class="rr-status-badge rr-status-pending">Đang chờ NCC xác nhận</span>`;
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${r.productName}</strong></td>
+                        <td>${r.manufacturer}</td>
+                        <td><div class="rr-items-list">${itemsHtml}</div></td>
+                        <td>${r.createdAt}</td>
+                        <td>${statusHtml}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            table.style.display = 'table';
+        })
+        .catch(() => {
+            loading.style.display = 'none';
+            empty.textContent = 'Không thể tải danh sách. Vui lòng thử lại.';
+            empty.style.display = 'block';
+        });
+}
+
+function confirmReceiveStock(id, btn) {
+    if (!confirm('Xác nhận đã kiểm hàng thực tế và nhập vào kho chính thức?')) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Đang xử lý...';
+
+    const url = '{{ route('admin.products.restockRequests.receive', ['id' => '__ID__']) }}'.replace('__ID__', id);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        }
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                loadRestockRequests();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+                btn.disabled = false;
+                btn.textContent = 'Xác nhận nhập kho';
+            }
+        })
+        .catch(() => {
+            alert('Không thể kết nối, vui lòng thử lại.');
+            btn.disabled = false;
+            btn.textContent = 'Xác nhận nhập kho';
+        });
+}
+
+let rejectTargetId = null;
+
+function openRejectReasonModal(id) {
+    rejectTargetId = id;
+    document.getElementById('reject-reason-input').value = '';
+    document.getElementById('reject-reason-error').style.display = 'none';
+    const submitBtn = document.getElementById('reject-reason-submit');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Gửi từ chối';
+    openModal('modal-reject-reason');
+}
+
+function submitRejectReason() {
+    const reason = document.getElementById('reject-reason-input').value.trim();
+    const errorEl = document.getElementById('reject-reason-error');
+
+    if (!reason) {
+        errorEl.textContent = 'Vui lòng nhập lý do từ chối nhận hàng.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    const submitBtn = document.getElementById('reject-reason-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang gửi...';
+
+    const url = '{{ route('admin.products.restockRequests.reject', ['id' => '__ID__']) }}'.replace('__ID__', rejectTargetId);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closeModal('modal-reject-reason');
+                loadRestockRequests();
+            } else {
+                errorEl.textContent = data.message || 'Có lỗi xảy ra, vui lòng thử lại.';
+                errorEl.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Gửi từ chối';
+            }
+        })
+        .catch(() => {
+            errorEl.textContent = 'Không thể kết nối, vui lòng thử lại.';
+            errorEl.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Gửi từ chối';
+        });
 }
 </script>
 @endpush

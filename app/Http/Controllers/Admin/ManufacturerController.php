@@ -29,6 +29,7 @@ class ManufacturerController extends Controller
             'manufacturerName' => 'required|string|max:200',
             'country'          => 'nullable|string|max:100',
             'website'          => 'nullable|url|max:255',
+            'email'            => 'nullable|email|max:255',  
         ], [
             'manufacturerCode.required' => 'Mã nhà cung cấp không được để trống.',
             'manufacturerCode.unique'   => 'Mã nhà cung cấp đã tồn tại.',
@@ -51,6 +52,7 @@ class ManufacturerController extends Controller
             'manufacturerName' => 'required|string|max:200',
             'country'          => 'nullable|string|max:100',
             'website'          => 'nullable|url|max:255',
+            
         ]);
 
         $manufacturer->update($data);

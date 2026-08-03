@@ -3,16 +3,23 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RestockRejectedMail;
+use App\Mail\RestockRequestMail;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Manufacturer;
 use App\Models\ProductVariant;
 use App\Models\ProductImage;
 use App\Models\Color;
+use App\Models\RestockRequest;
+use App\Models\RestockRequestItem;
 use App\Models\Size;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
@@ -134,7 +141,7 @@ class ProductController extends Controller
         return view('admin.products.form', compact('product', 'categories', 'manufacturers', 'colors', 'sizes'));
     }
 
-   public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
 
@@ -250,8 +257,8 @@ class ProductController extends Controller
                 }
 
                 $product->variants()->whereNotIn('variantID', $existingIds)
-                                    ->whereDoesntHave('orderDetails')
-                                    ->delete();
+                    ->whereDoesntHave('orderDetails')
+                    ->delete();
             } else {
                 $product->variants()->whereDoesntHave('orderDetails')->delete();
             }
@@ -260,7 +267,7 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')
             ->with('success', 'Đã cập nhật sản phẩm.');
     }
-    
+
     public function destroy($id)
     {
         $product = Product::with('images')->findOrFail($id);
@@ -304,32 +311,195 @@ class ProductController extends Controller
 
         return back()->with('success', 'Đã xóa ảnh.');
     }
+    // public function restock(Request $request, $id)
+    // {
+    //     $product = Product::with('variants')->findOrFail($id);
+
+    //     $request->validate([
+    //         'restock'   => 'required|array',
+    //         'restock.*' => 'nullable|integer|min:0',
+    //     ]);
+
+    //     $updated = 0;
+    //     foreach ($request->input('restock', []) as $variantID => $qty) {
+    //         $qty = (int) $qty;
+    //         if ($qty > 0) {
+    //             ProductVariant::where('variantID', $variantID)
+    //                 ->where('productID', $product->productID)
+    //                 ->increment('stockQuantity', $qty);
+    //             $updated++;
+    //         }
+    //     }
+
+    //     if ($updated === 0) {
+    //         return redirect()->route('admin.products.index')
+    //             ->with('error', 'Vui lòng nhập số lượng cần bổ sung cho ít nhất 1 biến thể.');
+    //     }
+
+    //     return redirect()->route('admin.products.index')
+    //         ->with('success', 'Đã nhập hàng cho "' . $product->productName . '" (' . $updated . ' biến thể).');
+    // }
     public function restock(Request $request, $id)
     {
-        $product = Product::with('variants')->findOrFail($id);
+        $product = Product::with('manufacturer')->findOrFail($id);
 
+        if (!$product->manufacturer || empty($product->manufacturer->email)) {
+            return back()->with(
+                'error',
+                'Nhà cung cấp của sản phẩm này chưa có email. Vui lòng cập nhật email nhà cung cấp trước khi tạo yêu cầu nhập hàng.'
+            );
+        }
+
+        $rows = collect($request->input('restock', []))
+            ->map(fn($qty, $variantId) => [
+                'variantID' => (int) $variantId,
+                'quantity'  => (int) $qty,
+            ])
+            ->filter(fn($row) => $row['quantity'] > 0)
+            ->values();
+
+        if ($rows->isEmpty()) {
+            return back()->with('error', 'Vui lòng nhập số lượng cần nhập cho ít nhất một biến thể.');
+        }
+
+        $restockRequest = DB::transaction(function () use ($product, $rows) {
+            $restockRequest = RestockRequest::create([
+                'productID'      => $product->productID,
+                'manufacturerID' => $product->manufacturerID,
+                'token'          => Str::random(64),
+                'status'         => RestockRequest::STATUS_PENDING,
+                'requestedBy'    => Auth::user()->employeeID ?? NULL,
+            ]);
+
+            foreach ($rows as $row) {
+                RestockRequestItem::create([
+                    'restockRequestID' => $restockRequest->restockRequestID,
+                    'variantID'        => $row['variantID'],
+                    'quantity'         => $row['quantity'],
+                ]);
+            }
+
+            return $restockRequest;
+        });
+
+        Mail::to($product->manufacturer->email)->send(new RestockRequestMail($restockRequest));
+
+        return back()->with('success', 'Đã gửi yêu cầu nhập hàng đến nhà cung cấp (' . $product->manufacturer->email . '). Kho sẽ chỉ được cập nhật sau khi nhân viên kiểm hàng và xác nhận nhập kho chính thức.');
+    }
+    public function restockRequests()
+    {
+        $requests = RestockRequest::with([
+            'product',
+            'manufacturer',
+            'items.variant.size',
+            'items.variant.color',
+        ])
+            ->orderByDesc('created_at')
+            ->limit(100)
+            ->get()
+            ->map(function ($r) {
+                return [
+                    'id'              => $r->restockRequestID,
+                    'productName'     => $r->product->productName ?? '—',
+                    'manufacturer'    => $r->manufacturer->manufacturerName ?? '—',
+                    'status'          => $r->status, // 'pending' | 'supplier_confirmed' | 'completed' | 'cancelled'
+                    'createdAt'       => $r->created_at->format('d/m/Y H:i'),
+                    'confirmedAt'     => $r->confirmedAt ? $r->confirmedAt->format('d/m/Y H:i') : null, // NCC xác nhận lúc nào
+                    'receivedAt'      => $r->receivedAt ? $r->receivedAt->format('d/m/Y H:i') : null,   // nhập kho chính thức lúc nào
+                    'cancelledAt'     => $r->cancelledAt ? $r->cancelledAt->format('d/m/Y H:i') : null,
+                    'cancelledByType' => $r->cancelledByType, // 'supplier' | 'staff' | null
+                    'cancelReason'    => $r->cancelReason,
+                    'items'           => $r->items->map(fn($i) => [
+                        'label'    => ($i->variant->size->sizeName ?? '?') . ' / ' . ($i->variant->color->colorName ?? '?'),
+                        'quantity' => $i->quantity,
+                    ]),
+                ];
+            });
+
+        return response()->json($requests);
+    }
+
+    public function receiveStock($id)
+    {
+        $restockRequest = RestockRequest::with('items')->findOrFail($id);
+
+        if (!$restockRequest->isSupplierConfirmed()) {
+            return response()->json([
+                'success' => false,
+                'message' => $restockRequest->isCompleted()
+                    ? 'Yêu cầu này đã được nhập kho trước đó.'
+                    : 'Chỉ có thể nhập kho sau khi nhà cung cấp đã xác nhận.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($restockRequest) {
+            $locked = RestockRequest::where('restockRequestID', $restockRequest->restockRequestID)
+                ->where('status', RestockRequest::STATUS_SUPPLIER_CONFIRMED)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$locked) {
+                return;
+            }
+
+            $items = $locked->items()->get();
+
+            foreach ($items as $item) {
+                ProductVariant::where('variantID', $item->variantID)
+                    ->increment('stockQuantity', $item->quantity);
+            }
+
+            $locked->status     = RestockRequest::STATUS_COMPLETED;
+            $locked->receivedBy = Auth::user()->employeeID ?? NULL;
+            $locked->receivedAt = now();
+            $locked->save();
+        });
+
+        return response()->json(['success' => true, 'message' => 'Đã nhập kho chính thức.']);
+    }
+
+    // ---- Method 4: nhân viên kiểm hàng KHÔNG đạt -> từ chối nhận hàng + gửi email lý do cho NCC ----
+    public function rejectReceipt(Request $request, $id)
+    {
         $request->validate([
-            'restock'   => 'required|array',
-            'restock.*' => 'nullable|integer|min:0',
+            'reason' => 'required|string|max:2000',
+        ], [
+            'reason.required' => 'Vui lòng nhập lý do từ chối nhận hàng.',
         ]);
 
-        $updated = 0;
-        foreach ($request->input('restock', []) as $variantID => $qty) {
-            $qty = (int) $qty;
-            if ($qty > 0) {
-                ProductVariant::where('variantID', $variantID)
-                    ->where('productID', $product->productID)
-                    ->increment('stockQuantity', $qty);
-                $updated++;
+        $restockRequest = RestockRequest::with(['items', 'manufacturer', 'product'])->findOrFail($id);
+
+        if (!$restockRequest->isSupplierConfirmed()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chỉ có thể từ chối nhận hàng khi nhà cung cấp đã xác nhận và chưa nhập kho.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($restockRequest, $request) {
+            $locked = RestockRequest::where('restockRequestID', $restockRequest->restockRequestID)
+                ->where('status', RestockRequest::STATUS_SUPPLIER_CONFIRMED)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$locked) {
+                return;
             }
+
+            $locked->status            = RestockRequest::STATUS_CANCELLED;
+            $locked->cancelReason      = $request->input('reason');
+            $locked->cancelledByType   = RestockRequest::CANCELLED_BY_STAFF;
+            $locked->cancelledByUserID = Auth::user()->employeeID ?? NULL;
+            $locked->cancelledAt       = now();
+            $locked->save();
+        });
+
+        $restockRequest->refresh();
+
+        if ($restockRequest->manufacturer && $restockRequest->manufacturer->email) {
+            Mail::to($restockRequest->manufacturer->email)->send(new RestockRejectedMail($restockRequest));
         }
 
-        if ($updated === 0) {
-            return redirect()->route('admin.products.index')
-                ->with('error', 'Vui lòng nhập số lượng cần bổ sung cho ít nhất 1 biến thể.');
-        }
-
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Đã nhập hàng cho "' . $product->productName . '" (' . $updated . ' biến thể).');
+        return response()->json(['success' => true, 'message' => 'Đã từ chối nhận hàng và gửi email thông báo cho nhà cung cấp.']);
     }
 }

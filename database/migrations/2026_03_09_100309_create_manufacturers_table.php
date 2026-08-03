@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id('manufacturerID');
             $table->string('manufacturerCode',20)->unique();
             $table->string('manufacturerName',100);
+            $table->string('email')->nullable();
             $table->string('country',255)->nullable();
             $table->string('website',255)->nullable();
+            
             $table->timestamps();
         });
     }

@@ -20,6 +20,7 @@ use App\Http\Controllers\Client\AuthController as ClientAuthController;
 use App\Http\Controllers\Client\MinigameController;
 use App\Http\Controllers\Client\UserController as ClientUserController;
 use App\Http\Controllers\Client\WishlistController;
+use App\Http\Controllers\SupplierRestockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,7 +49,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                ->name('orders.updateStatus');
           Route::patch('orders/{id}/advance', [OrderController::class, 'advance'])
                ->name('orders.advance');
-          Route::get('products', [ProductController::class,'index'])->name('products.index');
+          Route::get('products', [ProductController::class, 'index'])->name('products.index');
           Route::middleware('owner')->group(function () {
                Route::patch('orders/{id}/cancel', [OrderController::class, 'cancel'])
                     ->name('orders.cancel');
@@ -59,10 +60,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
                Route::delete('products/images/{imageId}', [ProductController::class, 'deleteImage'])
                     ->name('products.deleteImage');
                Route::resource('products', ProductController::class)
-                    ->only(['store','update','destroy','create','edit'])
+                    ->only(['store', 'update', 'destroy', 'create', 'edit'])
                     ->parameters(['products' => 'id']);
+
                Route::patch('products/{id}/restock', [ProductController::class, 'restock'])
                     ->name('products.restock');
+               Route::get('products/restock-requests', [ProductController::class, 'restockRequests'])
+                    ->name('products.restockRequests');
+               Route::patch('products/restock-requests/{id}/receive', [ProductController::class, 'receiveStock'])
+                    ->name('products.restockRequests.receive');
+               Route::patch('products/restock-requests/{id}/reject', [ProductController::class, 'rejectReceipt'])
+                    ->name('products.restockRequests.reject');
 
                Route::resource('manufacturers', ManufacturerController::class)
                     ->only(['index', 'store', 'update', 'destroy'])
@@ -144,3 +152,12 @@ Route::prefix('')->name('client.')->group(function () {
      Route::post('thanh-toan/ma-giam-gia',      [ClientOrderController::class, 'applyDiscount'])->name('checkout.discount.apply');
      Route::delete('thanh-toan/ma-giam-gia',    [ClientOrderController::class, 'removeDiscount'])->name('checkout.discount.remove');
 });
+Route::get('nha-cung-cap/xac-nhan-nhap-hang/{token}', [SupplierRestockController::class, 'show'])
+     ->name('supplier.restock.show');
+
+Route::post('nha-cung-cap/xac-nhan-nhap-hang/{token}', [SupplierRestockController::class, 'confirm'])
+     ->name('supplier.restock.confirm');
+
+Route::post('nha-cung-cap/xac-nhan-nhap-hang/{token}/tu-choi', [SupplierRestockController::class, 'decline'])
+     ->name('supplier.restock.decline');
+

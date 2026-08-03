@@ -37,6 +37,7 @@
                 <th>Tên nhà cung cấp</th>
                 <th>Quốc gia</th>
                 <th>Website</th>
+                <th>Email</th>
                 <th>Số sản phẩm</th>
                 <th></th>
             </tr>
@@ -55,6 +56,15 @@
                     @if($mfr->website)
                         <a href="{{ $mfr->website }}" target="_blank" style="color:var(--gold);font-size:13px;text-decoration:none;">
                             {{ parse_url($mfr->website, PHP_URL_HOST) ?? $mfr->website }}
+                        </a>
+                    @else
+                        <span class="td-muted">—</span>
+                    @endif
+                </td>
+                 <td>
+                    @if($mfr->email)
+                        <a href="{{ $mfr->email }}" target="_blank" style="color:var(--gold);font-size:13px;text-decoration:none;">
+                            {{ parse_url($mfr->email, PHP_URL_HOST) ?? $mfr->email }}
                         </a>
                     @else
                         <span class="td-muted">—</span>
@@ -184,6 +194,10 @@
                     <div class="form-group">
                         <label>Website</label>
                         <input type="url" name="website" id="edit-website" class="form-control">
+                    </div>
+                     <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" id="edit-email" class="form-control">
                     </div>
                 </div>
             </div>
