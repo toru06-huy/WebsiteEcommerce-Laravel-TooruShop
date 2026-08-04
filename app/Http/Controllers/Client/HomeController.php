@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
-    // Lấy đệ quy tất cả categoryID con/cháu của một category root
     private function getAllChildIds(int $rootId): array
     {
         $all  = [];

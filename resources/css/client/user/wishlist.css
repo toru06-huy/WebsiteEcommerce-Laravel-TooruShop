@@ -1,0 +1,328 @@
+ @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+ :root {
+     --cream: #faf8f5;
+     --sand: #ede9e2;
+     --stone: #c9c3b8;
+     --charcoal: #2b2b2b;
+     --ink: #1a1a1a;
+     --sage: #7a9e87;
+     --sage-light: #eef3f0;
+     --gold: #c9a84c;
+     --error: #c0392b;
+     --radius: 10px;
+ }
+
+ body {
+     background: var(--cream);
+     color: var(--charcoal);
+     font-family: 'DM Sans', sans-serif;
+ }
+
+ .profile-page {
+     max-width: 1100px;
+     margin: 0 auto;
+     padding: 56px 24px 80px;
+     display: grid;
+     grid-template-columns: 240px 1fr;
+     gap: 40px;
+     align-items: start;
+ }
+
+ /* Sidebar */
+ .sidebar {
+     position: sticky;
+     top: 80px;
+     background: #fff;
+     border: 1px solid var(--sand);
+     border-radius: var(--radius);
+     overflow: hidden;
+ }
+
+ .sidebar-avatar {
+     background: var(--sand);
+     padding: 36px 24px;
+     text-align: center;
+     border-bottom: 1px solid var(--sand);
+ }
+
+ .avatar-circle {
+     width: 80px;
+     height: 80px;
+     border-radius: 50%;
+     background: var(--sage);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-family: 'Cormorant Garamond', serif;
+     font-size: 2rem;
+     color: #fff;
+     margin: 0 auto 12px;
+ }
+
+ .sidebar-name {
+     font-family: 'Cormorant Garamond', serif;
+     font-size: 1.1rem;
+     font-weight: 600;
+     color: var(--ink);
+ }
+
+ .sidebar-role {
+     font-size: 0.72rem;
+     text-transform: uppercase;
+     letter-spacing: 2px;
+     color: var(--stone);
+     margin-top: 4px;
+ }
+
+ .sidebar-nav {
+     padding: 12px 0;
+ }
+
+ .sidebar-nav a {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     padding: 12px 24px;
+     font-size: 0.875rem;
+     color: var(--charcoal);
+     text-decoration: none;
+     transition: background 0.15s, color 0.15s;
+ }
+
+ .sidebar-nav a:hover,
+ .sidebar-nav a.active {
+     background: var(--sage-light);
+     color: var(--sage);
+ }
+
+ .sidebar-nav a svg {
+     opacity: 0.6;
+     flex-shrink: 0;
+ }
+
+ .sidebar-nav a.active svg {
+     opacity: 1;
+ }
+
+ /* Main */
+ .main-content {
+     display: flex;
+     flex-direction: column;
+     gap: 28px;
+ }
+
+ .card {
+     background: #fff;
+     border: 1px solid var(--sand);
+     border-radius: var(--radius);
+     overflow: hidden;
+ }
+
+ .card-header {
+     padding: 22px 28px 18px;
+     border-bottom: 1px solid var(--sand);
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+ }
+
+ .card-title {
+     font-family: 'Cormorant Garamond', serif;
+     font-size: 1.15rem;
+     font-weight: 600;
+     color: var(--ink);
+ }
+
+ .card-subtitle {
+     font-size: 0.8rem;
+     color: var(--stone);
+     margin-top: 3px;
+ }
+
+ /* Wishlist item — giống cart item */
+ .wish-item {
+     display: grid;
+     grid-template-columns: 90px 1fr;
+     gap: 20px;
+     padding: 20px 28px;
+     border-bottom: 1px solid var(--sand);
+     align-items: start;
+ }
+
+ .wish-item:last-child {
+     border-bottom: none;
+ }
+
+ .wish-img {
+     width: 90px;
+     height: 110px;
+     overflow: hidden;
+     background: var(--cream);
+     flex-shrink: 0;
+     border-radius: 6px;
+ }
+
+ .wish-img img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+ }
+
+ .wish-img-placeholder {
+     width: 100%;
+     height: 100%;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+
+ .wish-info {
+     display: flex;
+     flex-direction: column;
+     gap: 4px;
+ }
+
+ .wish-name {
+     font-size: 14px;
+     color: var(--ink);
+     font-weight: 500;
+     line-height: 1.4;
+     text-decoration: none;
+ }
+
+ .wish-name:hover {
+     color: var(--sage);
+ }
+
+ .wish-category {
+     font-size: 12px;
+     color: var(--stone);
+ }
+
+ .wish-price {
+     font-size: 14px;
+     color: var(--gold);
+     margin-top: 4px;
+     font-weight: 500;
+ }
+
+ .wish-price-original {
+     font-size: 12px;
+     color: var(--stone);
+     text-decoration: line-through;
+     margin-right: 6px;
+ }
+
+ .wish-bottom {
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     margin-top: 12px;
+     flex-wrap: wrap;
+ }
+
+ .btn-wish-shop {
+     display: inline-flex;
+     align-items: center;
+     gap: 6px;
+     padding: 8px 18px;
+     background: var(--ink);
+     color: #fff;
+     font-size: 12px;
+     letter-spacing: 0.5px;
+     border: none;
+     border-radius: 6px;
+     cursor: pointer;
+     text-decoration: none;
+     transition: opacity .15s;
+ }
+
+ .btn-wish-shop:hover {
+     opacity: .8;
+ }
+
+ .btn-wish-remove {
+     background: none;
+     border: 1px solid var(--sand);
+     border-radius: 6px;
+     padding: 7px 14px;
+     font-size: 12px;
+     color: var(--stone);
+     cursor: pointer;
+     transition: all .15s;
+ }
+
+ .btn-wish-remove:hover {
+     border-color: var(--error);
+     color: var(--error);
+ }
+
+ /* Empty state */
+ .empty-state {
+     text-align: center;
+     padding: 64px 24px;
+ }
+
+ .empty-state svg {
+     opacity: .25;
+     margin-bottom: 20px;
+ }
+
+ .empty-state h3 {
+     font-family: 'Cormorant Garamond', serif;
+     font-size: 1.3rem;
+     color: var(--charcoal);
+     margin-bottom: 8px;
+ }
+
+ .empty-state p {
+     font-size: 0.875rem;
+     color: var(--stone);
+     margin-bottom: 24px;
+ }
+
+ /* Tier badge */
+ .tier-badge {
+     display: inline-flex;
+     align-items: center;
+     gap: 5px;
+     padding: 3px 10px;
+     border-radius: 20px;
+     font-size: 0.72rem;
+     font-weight: 600;
+     letter-spacing: 1px;
+     text-transform: uppercase;
+     margin-top: 8px;
+ }
+
+ .tier-bronze {
+     background: #f0e6d9;
+     color: #8b5e3c;
+ }
+
+ .tier-silver {
+     background: #eaecef;
+     color: #5a6472;
+ }
+
+ .tier-gold {
+     background: #fdf3d0;
+     color: #a07c10;
+ }
+
+ .tier-platinum {
+     background: #e8f0f7;
+     color: #2c5f8a;
+ }
+
+ @media (max-width: 768px) {
+     .profile-page {
+         grid-template-columns: 1fr;
+         padding: 24px 16px 60px;
+     }
+
+     .sidebar {
+         position: static;
+     }
+ }

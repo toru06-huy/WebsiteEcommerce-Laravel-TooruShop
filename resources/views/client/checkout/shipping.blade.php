@@ -2,71 +2,7 @@
 @section('title', 'Thông tin nhận hàng – VELOUR')
 
 @push('styles')
-<style>
-.checkout-bar { background: var(--cream); padding: 24px 0; border-bottom: 1px solid var(--border); }
-.checkout-steps { display: flex; align-items: center; justify-content: center; gap: 0; }
-.step { display: flex; align-items: center; gap: 10px; }
-.step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; }
-.step.done .step-num { background: var(--black); color: var(--white); }
-.step.active .step-num { background: var(--gold); color: var(--white); }
-.step.pending .step-num { background: transparent; border: 1px solid var(--border); color: var(--gray); }
-.step-label { font-size: 12px; letter-spacing: .5px; }
-.step.active .step-label { color: var(--black); font-weight: 500; }
-.step.pending .step-label { color: var(--gray); }
-.step-sep { width: 60px; height: 1px; background: var(--border); margin: 0 8px; flex-shrink: 0; }
-@media(max-width:600px){ .step-sep { width: 24px; } .step-label { display: none; } }
-
-.checkout-layout { display: grid; grid-template-columns: 1fr 340px; gap: 40px; padding: 40px 0 80px; align-items: start; }
-@media(max-width:960px){ .checkout-layout { grid-template-columns: 1fr; } }
-
-/* Form */
-.form-section { background: var(--white); }
-.form-title { font-family: var(--font-display); font-size: 24px; font-weight: 300; margin-bottom: 28px; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.form-grid .full { grid-column: 1 / -1; }
-@media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } .form-grid .full { grid-column: 1; } }
-
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--black); font-weight: 500; }
-.form-label span { color: #c0392b; }
-.form-control {
-  padding: 12px 14px; border: 1px solid var(--border); font-size: 13px;
-  outline: none; transition: var(--transition); background: var(--white);
-  color: var(--black); font-family: var(--font-body);
-}
-.form-control:focus { border-color: var(--black); }
-.form-control.error { border-color: #c0392b; }
-.form-error { font-size: 11px; color: #c0392b; }
-
-/* Summary panel */
-.checkout-summary { position: sticky; top: 88px; }
-.summary-box { background: var(--cream); padding: 24px; margin-bottom: 16px; }
-.summary-box-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; font-weight: 500; }
-.summary-item { display: flex; gap: 12px; margin-bottom: 12px; }
-.summary-item-img { width: 56px; height: 68px; object-fit: cover; background: var(--border); flex-shrink: 0; }
-.summary-item-info { flex: 1; }
-.summary-item-name { font-size: 12px; line-height: 1.4; }
-.summary-item-variant { font-size: 11px; color: var(--gray); margin-top: 2px; }
-.summary-item-price { font-size: 12px; color: var(--gold); margin-top: 4px; font-weight: 500; }
-.summary-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--gray); padding: 8px 0; }
-.summary-row.total-row { color: var(--black); font-weight: 500; font-size: 15px; border-top: 1px solid var(--border); margin-top: 4px; }
-.summary-row.discount-row { color: var(--gold); }
-
-/* Discount */
-.discount-box { background: var(--cream); padding: 20px 24px; }
-.discount-input-wrap { display: flex; gap: 8px; margin-top: 12px; }
-.discount-input { flex: 1; padding: 10px 12px; border: 1px solid var(--border); font-size: 13px; outline: none; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-body); }
-.discount-input:focus { border-color: var(--black); }
-.btn-apply-discount { padding: 10px 18px; background: var(--black); color: var(--white); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; transition: var(--transition); }
-.btn-apply-discount:hover { background: var(--gold); }
-.discount-msg { font-size: 12px; margin-top: 8px; }
-.discount-msg.success { color: #27ae60; }
-.discount-msg.error   { color: #c0392b; }
-.applied-discount { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(39,174,96,.08); border: 1px solid rgba(39,174,96,.2); border-radius: 2px; margin-top: 10px; font-size: 12px; }
-.applied-discount span { color: #27ae60; font-weight: 500; }
-.applied-discount button { font-size: 11px; color: var(--gray); text-decoration: underline; }
-.applied-discount button:hover { color: #c0392b; }
-</style>
+  @vite(['resources/css/client/checkout/shipping.css'])
 @endpush
 
 @section('content')

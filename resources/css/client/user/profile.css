@@ -1,0 +1,436 @@
+/* profile */
+ @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+ :root {
+     --cream: #faf8f5;
+     --sand: #ede9e2;
+     --stone: #c9c3b8;
+     --charcoal: #2b2b2b;
+     --ink: #1a1a1a;
+     --sage: #7a9e87;
+     --sage-light: #eef3f0;
+     --error: #c0392b;
+     --radius: 10px;
+ }
+
+ body {
+     background: var(--cream);
+     color: var(--charcoal);
+     font-family: 'DM Sans', sans-serif;
+ }
+
+ /* ── Page Layout ── */
+ .profile-page {
+     max-width: 1100px;
+     margin: 0 auto;
+     padding: 56px 24px 80px;
+     display: grid;
+     grid-template-columns: 240px 1fr;
+     gap: 40px;
+     align-items: start;
+ }
+
+ /* ── Sidebar ── */
+ .sidebar {
+     position: sticky;
+     top: 80px;
+     background: #fff;
+     border: 1px solid var(--sand);
+     border-radius: var(--radius);
+     overflow: hidden;
+ }
+
+ .sidebar-avatar {
+     background: var(--sand);
+     padding: 36px 24px;
+     text-align: center;
+     border-bottom: 1px solid var(--sand);
+ }
+
+ .avatar-circle {
+     width: 80px;
+     height: 80px;
+     border-radius: 50%;
+     background: var(--sage);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-family: 'Cormorant Garamond', serif;
+     font-size: 2rem;
+     color: #fff;
+     margin: 0 auto 12px;
+     letter-spacing: 1px;
+ }
+
+ .sidebar-name {
+     font-family: 'Cormorant Garamond', serif;
+     font-size: 1.1rem;
+     font-weight: 600;
+     color: var(--ink);
+ }
+
+ .sidebar-role {
+     font-size: 0.72rem;
+     text-transform: uppercase;
+     letter-spacing: 2px;
+     color: var(--stone);
+     margin-top: 4px;
+ }
+
+ .sidebar-nav {
+     padding: 12px 0;
+ }
+
+ .sidebar-nav a {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     padding: 12px 24px;
+     font-size: 0.875rem;
+     color: var(--charcoal);
+     text-decoration: none;
+     transition: background 0.15s, color 0.15s;
+     font-weight: 400;
+ }
+
+ .sidebar-nav a:hover,
+ .sidebar-nav a.active {
+     background: var(--sage-light);
+     color: var(--sage);
+ }
+
+ .sidebar-nav a svg {
+     opacity: 0.6;
+     flex-shrink: 0;
+ }
+
+ /* ── Main Content ── */
+ .main-content {
+     display: flex;
+     flex-direction: column;
+     gap: 28px;
+ }
+
+ /* ── Card ── */
+ .card {
+     background: #fff;
+     border: 1px solid var(--sand);
+     border-radius: var(--radius);
+     overflow: hidden;
+ }
+
+ .card-header {
+     padding: 22px 28px 18px;
+     border-bottom: 1px solid var(--sand);
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+ }
+
+ .card-title {
+     font-family: 'Cormorant Garamond', serif;
+     font-size: 1.35rem;
+     font-weight: 600;
+     color: var(--ink);
+     letter-spacing: 0.3px;
+ }
+
+ .card-subtitle {
+     font-size: 0.8rem;
+     color: var(--stone);
+     margin-top: 2px;
+ }
+
+ .card-body {
+     padding: 28px;
+ }
+
+ /* ── Form ── */
+ .form-grid {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     gap: 20px;
+ }
+
+ .form-grid .span-2 {
+     grid-column: span 2;
+ }
+
+ .form-group {
+     display: flex;
+     flex-direction: column;
+     gap: 6px;
+ }
+
+ .form-label {
+     font-size: 0.75rem;
+     font-weight: 500;
+     text-transform: uppercase;
+     letter-spacing: 1.2px;
+     color: var(--stone);
+ }
+
+ .form-control {
+     padding: 11px 14px;
+     border: 1.5px solid var(--sand);
+     border-radius: 7px;
+     font-family: 'DM Sans', sans-serif;
+     font-size: 0.9rem;
+     color: var(--ink);
+     background: var(--cream);
+     outline: none;
+     transition: border-color 0.2s, box-shadow 0.2s;
+     width: 100%;
+     box-sizing: border-box;
+ }
+
+ .form-control:focus {
+     border-color: var(--sage);
+     box-shadow: 0 0 0 3px rgba(122, 158, 135, 0.12);
+     background: #fff;
+ }
+
+ .form-control.is-invalid {
+     border-color: var(--error);
+ }
+
+ .invalid-feedback {
+     font-size: 0.78rem;
+     color: var(--error);
+     margin-top: 2px;
+ }
+
+ select.form-control {
+     cursor: pointer;
+ }
+
+ /* ── Buttons ── */
+ .btn {
+     display: inline-flex;
+     align-items: center;
+     gap: 7px;
+     padding: 11px 24px;
+     border-radius: 7px;
+     font-family: 'DM Sans', sans-serif;
+     font-size: 0.875rem;
+     font-weight: 500;
+     cursor: pointer;
+     border: none;
+     transition: all 0.2s;
+     text-decoration: none;
+ }
+
+ .btn-primary {
+     background: var(--sage);
+     color: #fff;
+ }
+
+ .btn-primary:hover {
+     background: #6a8e77;
+     transform: translateY(-1px);
+     box-shadow: 0 4px 12px rgba(122, 158, 135, 0.3);
+ }
+
+ .btn-outline {
+     background: transparent;
+     color: var(--charcoal);
+     border: 1.5px solid var(--sand);
+ }
+
+ .btn-outline:hover {
+     border-color: var(--stone);
+     background: var(--cream);
+ }
+
+ .card-actions {
+     padding: 20px 28px;
+     border-top: 1px solid var(--sand);
+     display: flex;
+     justify-content: flex-end;
+     gap: 12px;
+ }
+
+ /* ── Alert ── */
+ .alert {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     padding: 13px 18px;
+     border-radius: 8px;
+     font-size: 0.875rem;
+     margin-bottom: 20px;
+ }
+
+ .alert-success {
+     background: var(--sage-light);
+     color: #4a7a5a;
+     border: 1px solid #b8d4c0;
+ }
+
+ .alert-error {
+     background: #fdf2f2;
+     color: var(--error);
+     border: 1px solid #f1b8b8;
+ }
+
+ /* ── Divider ── */
+ .section-divider {
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     margin: 4px 0 20px;
+ }
+
+ .section-divider span {
+     font-size: 0.72rem;
+     text-transform: uppercase;
+     letter-spacing: 2px;
+     color: var(--stone);
+     white-space: nowrap;
+ }
+
+ .section-divider::before,
+ .section-divider::after {
+     content: '';
+     flex: 1;
+     height: 1px;
+     background: var(--sand);
+ }
+
+ /* ── Address Grid ── */
+ .address-grid {
+     display: grid;
+     grid-template-columns: 1fr 1fr 1fr;
+     gap: 16px;
+ }
+
+ /* ── Membership Tier ── */
+ .tier-badge {
+     display: inline-flex;
+     align-items: center;
+     gap: 5px;
+     padding: 3px 10px;
+     border-radius: 20px;
+     font-size: 0.72rem;
+     font-weight: 600;
+     letter-spacing: 1px;
+     text-transform: uppercase;
+     margin-top: 8px;
+ }
+
+ .tier-bronze {
+     background: #f0e6d9;
+     color: #8b5e3c;
+ }
+
+ .tier-silver {
+     background: #eaecef;
+     color: #5a6472;
+ }
+
+ .tier-gold {
+     background: #fdf3d0;
+     color: #a07c10;
+ }
+
+ .tier-platinum {
+     background: #e8f0f7;
+     color: #2c5f8a;
+ }
+
+ .tier-card {
+     background: #fff;
+     border: 1px solid var(--sand);
+     border-radius: var(--radius);
+     overflow: hidden;
+ }
+
+ .tier-progress-wrap {
+     padding: 24px 28px;
+ }
+
+ .tier-row {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     margin-bottom: 10px;
+ }
+
+ .tier-spent {
+     font-size: 0.85rem;
+     color: var(--stone);
+ }
+
+ .tier-bar-bg {
+     height: 6px;
+     background: var(--sand);
+     border-radius: 3px;
+     overflow: hidden;
+     margin-bottom: 16px;
+ }
+
+ .tier-bar-fill {
+     height: 100%;
+     border-radius: 3px;
+     transition: width 0.6s ease;
+ }
+
+ .fill-bronze {
+     background: #cd7f32;
+ }
+
+ .fill-silver {
+     background: #9ba4af;
+ }
+
+ .fill-gold {
+     background: #d4a017;
+ }
+
+ .fill-platinum {
+     background: #4a90c4;
+ }
+
+ .tier-milestones {
+     display: flex;
+     justify-content: space-between;
+     font-size: 0.72rem;
+     color: var(--stone);
+     letter-spacing: 0.5px;
+ }
+
+ .tier-milestones span.reached {
+     color: var(--sage);
+     font-weight: 600;
+ }
+
+ @media (max-width: 768px) {
+     .profile-page {
+         grid-template-columns: 1fr;
+         padding: 24px 16px;
+     }
+
+     .sidebar {
+         position: static;
+     }
+
+     .form-grid {
+         grid-template-columns: 1fr;
+     }
+
+     .form-grid .span-2 {
+         grid-column: span 1;
+     }
+
+     .address-grid {
+         grid-template-columns: 1fr 1fr;
+     }
+ }
+
+ @media (max-width: 480px) {
+     .address-grid {
+         grid-template-columns: 1fr;
+     }
+ }
+
+ /* order */

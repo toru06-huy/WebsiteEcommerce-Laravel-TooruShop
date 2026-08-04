@@ -3,406 +3,7 @@
 @section('title', 'Mã giảm giá của tôi')
 
 @push('styles')
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
-
-        :root {
-            --cream: #faf8f5;
-            --sand: #ede9e2;
-            --stone: #c9c3b8;
-            --charcoal: #2b2b2b;
-            --ink: #1a1a1a;
-            --sage: #7a9e87;
-            --sage-light: #eef3f0;
-            --gold: #c9a84c;
-            --error: #c0392b;
-            --radius: 10px;
-        }
-
-        body {
-            background: var(--cream);
-            color: var(--charcoal);
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        .profile-page {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 56px 24px 80px;
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            gap: 40px;
-            align-items: start;
-        }
-
-        /* ── Sidebar ── */
-        .sidebar {
-            position: sticky;
-            top: 80px;
-            background: #fff;
-            border: 1px solid var(--sand);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .sidebar-avatar {
-            background: var(--sand);
-            padding: 36px 24px;
-            text-align: center;
-            border-bottom: 1px solid var(--sand);
-        }
-
-        .avatar-circle {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: var(--sage);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2rem;
-            color: #fff;
-            margin: 0 auto 12px;
-        }
-
-        .sidebar-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--ink);
-        }
-
-        .sidebar-role {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--stone);
-            margin-top: 4px;
-        }
-
-        .sidebar-nav {
-            padding: 12px 0;
-        }
-
-        .sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 24px;
-            font-size: 0.875rem;
-            color: var(--charcoal);
-            text-decoration: none;
-            transition: background 0.15s, color 0.15s;
-        }
-
-        .sidebar-nav a:hover,
-        .sidebar-nav a.active {
-            background: var(--sage-light);
-            color: var(--sage);
-        }
-
-        .sidebar-nav a svg {
-            opacity: 0.6;
-            flex-shrink: 0;
-        }
-
-        /* ── Main ── */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .page-header {
-            margin-bottom: 4px;
-        }
-
-        .page-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: var(--ink);
-        }
-
-        .page-sub {
-            font-size: 0.85rem;
-            color: var(--stone);
-            margin-top: 4px;
-        }
-
-        /* ── Tabs ── */
-        .tabs {
-            display: flex;
-            gap: 4px;
-            border-bottom: 1px solid var(--sand);
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            padding: 10px 20px;
-            font-size: 0.875rem;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            color: var(--stone);
-            font-family: 'DM Sans', sans-serif;
-            transition: all 0.2s;
-            margin-bottom: -1px;
-        }
-
-        .tab-btn.active {
-            color: var(--sage);
-            border-bottom-color: var(--sage);
-            font-weight: 500;
-        }
-
-        /* ── Voucher Card ── */
-        .voucher-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .voucher-card {
-            background: #fff;
-            border: 1px solid var(--sand);
-            border-radius: var(--radius);
-            display: flex;
-            overflow: hidden;
-            position: relative;
-            transition: box-shadow 0.2s;
-        }
-
-        .voucher-card:hover {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-        }
-
-        .voucher-card.used {
-            opacity: 0.55;
-        }
-
-        .voucher-card.expired {
-            opacity: 0.55;
-        }
-
-        /* Dải màu trái */
-        .voucher-strip {
-            width: 6px;
-            flex-shrink: 0;
-            background: var(--sage);
-        }
-
-        .voucher-card.used .voucher-strip {
-            background: var(--stone);
-        }
-
-        .voucher-card.expired .voucher-strip {
-            background: var(--stone);
-        }
-
-        /* Phần mã + icon */
-        .voucher-left {
-            padding: 20px 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-width: 130px;
-            border-right: 1.5px dashed var(--sand);
-            gap: 6px;
-        }
-
-        .voucher-icon {
-            font-size: 1.8rem;
-        }
-
-        .voucher-code {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--gold);
-            letter-spacing: 1px;
-            text-align: center;
-            word-break: break-all;
-        }
-
-        .voucher-card.used .voucher-code {
-            color: var(--stone);
-        }
-
-        .voucher-card.expired .voucher-code {
-            color: var(--stone);
-        }
-
-        /* Phần nội dung */
-        .voucher-body {
-            padding: 18px 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .voucher-name {
-            font-weight: 500;
-            font-size: 0.95rem;
-            color: var(--ink);
-        }
-
-        .voucher-value {
-            font-size: 1.1rem;
-            font-family: 'Cormorant Garamond', serif;
-            font-weight: 600;
-            color: var(--sage);
-        }
-
-        .voucher-card.used .voucher-value {
-            color: var(--stone);
-        }
-
-        .voucher-card.expired .voucher-value {
-            color: var(--stone);
-        }
-
-        .voucher-meta {
-            font-size: 0.78rem;
-            color: var(--stone);
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        /* Badge trạng thái */
-        .voucher-status {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 3px 10px;
-            border-radius: 20px;
-        }
-
-        .status-active {
-            background: var(--sage-light);
-            color: var(--sage);
-        }
-
-        .status-used {
-            background: #f0f0f0;
-            color: #999;
-        }
-
-        .status-expired {
-            background: #fdf2f2;
-            color: var(--error);
-        }
-
-        /* Nút copy */
-        .btn-copy {
-            margin-top: auto;
-            align-self: flex-start;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 14px;
-            border: 1.5px solid var(--sage);
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: var(--sage);
-            background: none;
-            cursor: pointer;
-            font-family: 'DM Sans', sans-serif;
-            transition: all 0.15s;
-        }
-
-        .btn-copy:hover {
-            background: var(--sage-light);
-        }
-
-        .btn-copy.copied {
-            border-color: var(--stone);
-            color: var(--stone);
-            cursor: default;
-        }
-
-        /* Empty */
-        .empty-voucher {
-            text-align: center;
-            padding: 64px 24px;
-            color: var(--stone);
-        }
-
-        .empty-voucher svg {
-            margin-bottom: 16px;
-            opacity: 0.3;
-        }
-
-        .empty-voucher h3 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.3rem;
-            color: var(--charcoal);
-            margin-bottom: 8px;
-        }
-
-        .empty-voucher p {
-            font-size: 0.875rem;
-        }
-
-        /* Tier badge */
-        .tier-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-top: 8px;
-        }
-
-        .tier-bronze {
-            background: #f0e6d9;
-            color: #8b5e3c;
-        }
-
-        .tier-silver {
-            background: #eaecef;
-            color: #5a6472;
-        }
-
-        .tier-gold {
-            background: #fdf3d0;
-            color: #a07c10;
-        }
-
-        .tier-platinum {
-            background: #e8f0f7;
-            color: #2c5f8a;
-        }
-
-        @media (max-width: 768px) {
-            .profile-page {
-                grid-template-columns: 1fr;
-                padding: 24px 16px;
-            }
-
-            .sidebar {
-                position: static;
-            }
-
-            .voucher-left {
-                min-width: 100px;
-                padding: 16px;
-            }
-        }
-    </style>
+    @vite(['resources/css/client/user/voucher.css'])
 @endpush
 
 @section('content')
@@ -473,7 +74,6 @@
 
             <div class="page-header">
                 <div class="page-title">Mã giảm giá của tôi</div>
-                <div class="page-sub">Các mã giảm giá được thưởng khi lên hạng thành viên</div>
             </div>
 
             @php
@@ -517,7 +117,11 @@
                         <div class="voucher-body">
                             <div class="voucher-name">{{ $d->discountName }}</div>
                             <div class="voucher-value">
-                                Giảm {{ number_format($d->discountValue, 0) }}%
+                                @if($d->discountType=='percentage')
+                                Giảm {{ number_format($d->discountValue, 0) }} %
+                                @else
+                                Giảm {{ number_format($d->discountValue, 0) }} vnđ  
+                                @endif
                             </div>
                             <div class="voucher-meta">
                                 @if ($d->minOrderValue > 0)
@@ -562,7 +166,13 @@
                         </div>
                         <div class="voucher-body">
                             <div class="voucher-name">{{ $d->discountName }}</div>
-                            <div class="voucher-value">Giảm {{ number_format($d->discountValue, 0) }}%</div>
+                            <div class="voucher-value">
+                                @if($d->discountType=='percentage')
+                                Giảm {{ number_format($d->discountValue, 0) }} %
+                                @else
+                                Giảm {{ number_format($d->discountValue, 0) }} vnđ  
+                                @endif
+                            </div>
                             <div class="voucher-meta">
                                 <span>Đã dùng {{ $ud->usedAt?->format('d/m/Y H:i') ?? '—' }}</span>
                             </div>
@@ -588,7 +198,13 @@
                         </div>
                         <div class="voucher-body">
                             <div class="voucher-name">{{ $d->discountName }}</div>
-                            <div class="voucher-value">Giảm {{ number_format($d->discountValue, 0) }}%</div>
+                            <div class="voucher-value">
+                                @if($d->discountType=='percentage')
+                                Giảm {{ number_format($d->discountValue, 0) }} %
+                                @else
+                                Giảm {{ number_format($d->discountValue, 0) }} vnđ  
+                                @endif
+                            </div>
                             <div class="voucher-meta">
                                 <span>Hết hạn {{ $d->endDate->format('d/m/Y') }}</span>
                             </div>
