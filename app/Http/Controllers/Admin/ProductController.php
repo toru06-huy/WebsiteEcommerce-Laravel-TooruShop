@@ -29,7 +29,7 @@ class ProductController extends Controller
         $query = Product::with(['category', 'manufacturer', 'variants', 'coverImage']);
 
         if ($request->filled('search')) {
-            $query->where('productName', 'like', '%' . $request->search . '%');
+            $this->applySmartSearch($query, $request->search);
         }
 
         if ($request->filled('category')) {
@@ -44,7 +44,82 @@ class ProductController extends Controller
 
         return view('admin.products.index', compact('products', 'categories'));
     }
+    private function applySmartSearch($query, string $searchTerm): void
+    {
+        if ($searchTerm === '') {
+            return;
+        }
 
+        $searchWordsRaw = preg_split('/\s+/u', mb_strtolower($searchTerm, 'UTF-8'));
+        $searchWords     = array_filter($searchWordsRaw, fn($w) => $w !== '');
+
+        $matchedColorIds = Color::where(function ($q) use ($searchTerm, $searchWords) {
+            $q->where('colorName', 'like', '%' . $searchTerm . '%');
+            foreach ($searchWords as $word) {
+                $q->orWhere('colorName', 'like', '%' . $word . '%');
+            }
+        })->pluck('colorID');
+
+        $matchedSizeIds = Size::where(function ($q) use ($searchTerm, $searchWords) {
+            $q->where('sizeName', 'like', '%' . $searchTerm . '%')
+                ->orWhere('sizeCode', 'like', '%' . $searchTerm . '%');
+            foreach ($searchWords as $word) {
+                $q->orWhere('sizeName', 'like', '%' . $word . '%')
+                    ->orWhere('sizeCode', 'like', '%' . $word . '%');
+            }
+        })->pluck('sizeID');
+
+        $matchedCategoryIds = collect();
+        $allCategories      = Category::all()->keyBy('categoryID');
+
+        foreach ($allCategories as $cat) {
+            $rootName = $cat->categoryName;
+            $node     = $cat;
+            while ($node->parentID && $allCategories->has($node->parentID)) {
+                $node     = $allCategories->get($node->parentID);
+                $rootName = $node->categoryName;
+            }
+
+            $combined = mb_strtolower($cat->categoryName . ' ' . $rootName, 'UTF-8');
+
+            $matchesAllWords = true;
+            foreach ($searchWords as $word) {
+                if (mb_strpos($combined, $word) === false) {
+                    $matchesAllWords = false;
+                    break;
+                }
+            }
+
+            if ($matchesAllWords) {
+                $matchedCategoryIds->push($cat->categoryID);
+            }
+        }
+
+        $query->where(function ($q) use ($searchTerm, $matchedColorIds, $matchedSizeIds, $matchedCategoryIds) {
+
+            $q->where('productName', 'like', '%' . $searchTerm . '%');
+
+            // Khớp theo danh mục (kể cả danh mục cha, VD "nam", "áo nam")
+            if ($matchedCategoryIds->isNotEmpty()) {
+                $q->orWhereIn('categoryID', $matchedCategoryIds);
+            }
+
+            // Khớp theo màu hoặc size của các biến thể còn hàng
+            if ($matchedColorIds->isNotEmpty() || $matchedSizeIds->isNotEmpty()) {
+                $q->orWhereHas('variants', function ($vq) use ($matchedColorIds, $matchedSizeIds) {
+                    $vq->where('stockQuantity', '>', 0);
+                    $vq->where(function ($iq) use ($matchedColorIds, $matchedSizeIds) {
+                        if ($matchedColorIds->isNotEmpty()) {
+                            $iq->orWhereIn('colorID', $matchedColorIds);
+                        }
+                        if ($matchedSizeIds->isNotEmpty()) {
+                            $iq->orWhereIn('sizeID', $matchedSizeIds);
+                        }
+                    });
+                });
+            }
+        });
+    }
     public function create()
     {
         $categories    = Category::orderBy('categoryName')->get();

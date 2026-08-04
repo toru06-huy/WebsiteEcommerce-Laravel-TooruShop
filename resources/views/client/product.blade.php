@@ -268,8 +268,7 @@ function selectSize(sizeId) {
   document.querySelector(`.size-btn[data-size-id="${sizeId}"]`)?.classList.add('active');
   document.getElementById('selectedSizeName').textContent = size.sizeName;
 
-  // Price
-  document.getElementById('displayPrice').textContent = new Intl.NumberFormat('vi-VN').format(size.price) + 'đ';
+
 
   // Stock info
   document.getElementById('stockMsg').textContent = `Còn ${size.stockQuantity} sản phẩm`;
