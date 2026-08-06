@@ -49,73 +49,112 @@ class ProductController extends Controller
         if ($searchTerm === '') {
             return;
         }
+        $stopWords = ['size', 'mau', 'màu'];
 
         $searchWordsRaw = preg_split('/\s+/u', mb_strtolower($searchTerm, 'UTF-8'));
-        $searchWords     = array_filter($searchWordsRaw, fn($w) => $w !== '');
+        $searchWords     = array_values(array_filter($searchWordsRaw, fn($w) => $w !== ''));
 
-        $matchedColorIds = Color::where(function ($q) use ($searchTerm, $searchWords) {
-            $q->where('colorName', 'like', '%' . $searchTerm . '%');
-            foreach ($searchWords as $word) {
-                $q->orWhere('colorName', 'like', '%' . $word . '%');
-            }
-        })->pluck('colorID');
+        // ===== 1. Xác định từ nào match MÀU =====
+        $allColors = Color::all();
+        $colorWords     = [];
+        $matchedColorIds = collect();
 
-        $matchedSizeIds = Size::where(function ($q) use ($searchTerm, $searchWords) {
-            $q->where('sizeName', 'like', '%' . $searchTerm . '%')
-                ->orWhere('sizeCode', 'like', '%' . $searchTerm . '%');
-            foreach ($searchWords as $word) {
-                $q->orWhere('sizeName', 'like', '%' . $word . '%')
-                    ->orWhere('sizeCode', 'like', '%' . $word . '%');
-            }
-        })->pluck('sizeID');
-
-        $matchedCategoryIds = collect();
-        $allCategories      = Category::all()->keyBy('categoryID');
-
-        foreach ($allCategories as $cat) {
-            $rootName = $cat->categoryName;
-            $node     = $cat;
-            while ($node->parentID && $allCategories->has($node->parentID)) {
-                $node     = $allCategories->get($node->parentID);
-                $rootName = $node->categoryName;
-            }
-
-            $combined = mb_strtolower($cat->categoryName . ' ' . $rootName, 'UTF-8');
-
-            $matchesAllWords = true;
-            foreach ($searchWords as $word) {
-                if (mb_strpos($combined, $word) === false) {
-                    $matchesAllWords = false;
-                    break;
+        foreach ($searchWords as $word) {
+            foreach ($allColors as $color) {
+                if (mb_strpos(mb_strtolower($color->colorName, 'UTF-8'), $word) !== false) {
+                    $colorWords[]      = $word;
+                    $matchedColorIds->push($color->colorID);
                 }
             }
+        }
+        $matchedColorIds = $matchedColorIds->unique();
 
-            if ($matchesAllWords) {
-                $matchedCategoryIds->push($cat->categoryID);
+        // ===== 2. Xác định từ nào match SIZE =====
+        $allSizes = Size::all();
+        $sizeWords     = [];
+        $matchedSizeIds = collect();
+
+        foreach ($searchWords as $word) {
+            foreach ($allSizes as $size) {
+                $sizeName = mb_strtolower($size->sizeName, 'UTF-8');
+                $sizeCode = mb_strtolower($size->sizeCode, 'UTF-8');
+                if (mb_strpos($sizeName, $word) !== false || $sizeCode === $word || mb_strpos($sizeCode, $word) !== false) {
+                    $sizeWords[]      = $word;
+                    $matchedSizeIds->push($size->sizeID);
+                }
+            }
+        }
+        $matchedSizeIds = $matchedSizeIds->unique();
+
+        // ===== 3. Các từ còn lại (không phải màu/size/stopword) dùng để match CATEGORY =====
+        $usedWords = array_merge($colorWords, $sizeWords, $stopWords);
+        $categoryWords = array_values(array_filter($searchWords, fn($w) => !in_array($w, $usedWords, true)));
+
+        $matchedCategoryIds = collect();
+        if (!empty($categoryWords)) {
+            $allCategories = Category::all()->keyBy('categoryID');
+
+            foreach ($allCategories as $cat) {
+                $rootName = $cat->categoryName;
+                $node     = $cat;
+                while ($node->parentID && $allCategories->has($node->parentID)) {
+                    $node     = $allCategories->get($node->parentID);
+                    $rootName = $node->categoryName;
+                }
+
+                $combined = mb_strtolower($cat->categoryName . ' ' . $rootName, 'UTF-8');
+
+                $matchesAllWords = true;
+                foreach ($categoryWords as $word) {
+                    if (mb_strpos($combined, $word) === false) {
+                        $matchesAllWords = false;
+                        break;
+                    }
+                }
+
+                if ($matchesAllWords) {
+                    $matchedCategoryIds->push($cat->categoryID);
+                }
             }
         }
 
-        $query->where(function ($q) use ($searchTerm, $matchedColorIds, $matchedSizeIds, $matchedCategoryIds) {
+        // ===== 4. Ghép điều kiện: các facet đã phát hiện phải AND với nhau =====
+        $hasCategoryFacet = $matchedCategoryIds->isNotEmpty();
+        $hasVariantFacet  = $matchedColorIds->isNotEmpty() || $matchedSizeIds->isNotEmpty();
 
+        $query->where(function ($q) use (
+            $searchTerm,
+            $hasCategoryFacet,
+            $hasVariantFacet,
+            $matchedCategoryIds,
+            $matchedColorIds,
+            $matchedSizeIds
+        ) {
+            // Fallback: match trực tiếp theo tên sản phẩm
             $q->where('productName', 'like', '%' . $searchTerm . '%');
 
-            // Khớp theo danh mục (kể cả danh mục cha, VD "nam", "áo nam")
-            if ($matchedCategoryIds->isNotEmpty()) {
-                $q->orWhereIn('categoryID', $matchedCategoryIds);
-            }
-
-            // Khớp theo màu hoặc size của các biến thể còn hàng
-            if ($matchedColorIds->isNotEmpty() || $matchedSizeIds->isNotEmpty()) {
-                $q->orWhereHas('variants', function ($vq) use ($matchedColorIds, $matchedSizeIds) {
-                    $vq->where('stockQuantity', '>', 0);
-                    $vq->where(function ($iq) use ($matchedColorIds, $matchedSizeIds) {
-                        if ($matchedColorIds->isNotEmpty()) {
-                            $iq->orWhereIn('colorID', $matchedColorIds);
-                        }
-                        if ($matchedSizeIds->isNotEmpty()) {
-                            $iq->orWhereIn('sizeID', $matchedSizeIds);
-                        }
-                    });
+            if ($hasCategoryFacet || $hasVariantFacet) {
+                $q->orWhere(function ($fq) use (
+                    $hasCategoryFacet,
+                    $hasVariantFacet,
+                    $matchedCategoryIds,
+                    $matchedColorIds,
+                    $matchedSizeIds
+                ) {
+                    if ($hasCategoryFacet) {
+                        $fq->whereIn('categoryID', $matchedCategoryIds);
+                    }
+                    if ($hasVariantFacet) {
+                        $fq->whereHas('variants', function ($vq) use ($matchedColorIds, $matchedSizeIds) {
+                            $vq->where('stockQuantity', '>', 0);
+                            if ($matchedColorIds->isNotEmpty()) {
+                                $vq->whereIn('colorID', $matchedColorIds);
+                            }
+                            if ($matchedSizeIds->isNotEmpty()) {
+                                $vq->whereIn('sizeID', $matchedSizeIds);
+                            }
+                        });
+                    }
                 });
             }
         });

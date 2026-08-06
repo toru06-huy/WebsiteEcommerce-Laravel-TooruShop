@@ -32,9 +32,9 @@
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </div>
-                <a href="tel:19001234" class="header-icon-btn">
+                <a href="https://zalo.me/0931462157" target="_blank" class="header-icon-btn">
                     <i class="fa-solid fa-phone"></i>
-                    <span>Liên hệ</span>
+                    <span>Zalo</span>
                 </a>
                 @auth
                     <div class="header-icon-btn" style="position:relative; cursor:pointer;" onclick="toggleUserMenu()">

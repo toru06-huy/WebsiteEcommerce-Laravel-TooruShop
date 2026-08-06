@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin'      => \App\Http\Middleware\AdminMiddleware::class,
             'admin.only' => \App\Http\Middleware\AdminOnlyMiddleware::class,
             'owner'      => \App\Http\Middleware\OwnerMiddleware::class,
+            'user'       => \App\Http\Middleware\UserMiddleware::class,
         ]);
 
         $middleware->web(append: [

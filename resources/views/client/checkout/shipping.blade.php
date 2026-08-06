@@ -136,6 +136,26 @@
             <button class="btn-apply-discount" onclick="applyDiscount()">Áp dụng</button>
           </div>
           <div class="discount-msg" id="discountMsg"></div>
+
+          @if(isset($publicDiscounts) && $publicDiscounts->count())
+            <div class="public-discount-list" style="margin-top:14px;">
+              <div style="font-size:11px;color:var(--gray);margin-bottom:8px;">Mã giảm giá khả dụng</div>
+              @foreach($publicDiscounts as $pd)
+                <div class="public-discount-item"
+                     style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px dashed var(--border);border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;"
+                     onclick="applyDiscountCode('{{ $pd->discountCode }}')">
+                  <div>
+                    <div style="font-weight:600;font-size:12px;">{{ $pd->discountCode }}</div>
+                    <div style="font-size:11px;color:var(--gray);">{{ $pd->discountName }}</div>
+                    @if($pd->minOrderValue > 0)
+                      <div style="font-size:10px;color:var(--gray);">Đơn tối thiểu {{ number_format($pd->minOrderValue,0,',','.') }}đ</div>
+                    @endif
+                  </div>
+                  <button type="button" class="btn-apply-discount" style="padding:6px 10px;font-size:10px;white-space:nowrap;">Dùng mã</button>
+                </div>
+              @endforeach
+            </div>
+          @endif
         @endif
       </div>
     </div>
@@ -208,6 +228,12 @@ document.addEventListener("DOMContentLoaded", function() {
         updateWards(oldWard);
     }
 });
+
+function applyDiscountCode(code) {
+  const input = document.getElementById('discountCode');
+  if (input) input.value = code;
+  applyDiscount();
+}
 
 async function applyDiscount() {
   const code = document.getElementById('discountCode')?.value?.trim();

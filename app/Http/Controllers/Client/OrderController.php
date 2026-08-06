@@ -30,8 +30,6 @@ class OrderController extends Controller
         if (empty($cartItems)) {
             return redirect()->route('client.cart')->with('error', 'Giỏ hàng trống.');
         }
-
-        // Lưu cart snapshot vào session checkout
         session(['checkout.cart' => $cartItems]);
         return redirect()->route('client.checkout.shipping');
     }
@@ -47,10 +45,55 @@ class OrderController extends Controller
         $rootCategories = Category::with('children')->whereNull('parentID')->get();
         $total          = collect($cartItems)->sum(fn($i) => $i['price'] * $i['quantity']);
         $discountData   = session('checkout.discount');
+        $publicDiscounts = $this->getAvailablePublicDiscounts($user, $total);
 
-        return view('client.checkout.shipping', compact('rootCategories', 'cartItems', 'total', 'user', 'address', 'discountData'));
+        return view('client.checkout.shipping', compact('rootCategories', 'cartItems', 'total', 'user', 'address', 'discountData', 'publicDiscounts'));
     }
+    private function getAvailablePublicDiscounts($user, float $total)
+    {
+        $now = Carbon::now();
 
+        $discounts = Discount::where('isActive', true)
+            ->where('isPersonal', false)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('startDate')->orWhere('startDate', '<=', $now);
+            })
+            ->where(function ($q) use ($now) {
+                $q->whereNull('endDate')->orWhere('endDate', '>=', $now);
+            })
+            ->orderByDesc('discountID')
+            ->get();
+
+        return $discounts->filter(function ($discount) use ($user, $total) {
+            // Chưa đạt giá trị đơn hàng tối thiểu
+            if ($total < $discount->minOrderValue) {
+                return false;
+            }
+
+            // Đã hết lượt sử dụng
+            if ($discount->discountLimit) {
+                $usedTotal = UserDiscount::where('discountID', $discount->discountID)
+                    ->where('isUsed', true)
+                    ->count();
+                if ($usedTotal >= $discount->discountLimit) {
+                    return false;
+                }
+            }
+
+            // Người dùng đã đăng nhập và đã sử dụng mã này rồi
+            if ($user) {
+                $alreadyUsed = UserDiscount::where('discountID', $discount->discountID)
+                    ->where('userID', $user->userID)
+                    ->where('isUsed', true)
+                    ->exists();
+                if ($alreadyUsed) {
+                    return false;
+                }
+            }
+
+            return true;
+        })->values();
+    }
     public function submitShipping(Request $request)
     {
         $cartItems = session('checkout.cart');
@@ -72,7 +115,6 @@ class OrderController extends Controller
             'addressDetail.required' => 'Vui lòng nhập địa chỉ chi tiết.',
         ]);
 
-        // Lưu hoặc cập nhật địa chỉ (chỉ áp dụng cho người dùng đã đăng nhập)
         $user = Auth::guard('web')->user();
         if ($user) {
             Address::updateOrCreate(
@@ -111,8 +153,8 @@ class OrderController extends Controller
         $total          = collect($cartItems)->sum(fn($i) => $i['price'] * $i['quantity']);
         $discountData   = session('checkout.discount');
         $finalAmount    = $discountData ? $discountData['finalAmount'] : $total;
-        if($finalAmount < 500000){
-            $finalAmount += 42000; 
+        if ($finalAmount < 500000) {
+            $finalAmount += 42000;
         }
         return view('client.checkout.payment', compact('rootCategories', 'cartItems', 'total', 'shippingInfo', 'discountData', 'finalAmount'));
     }
@@ -298,7 +340,6 @@ class OrderController extends Controller
 
         // ── Phân loại mã ────────────────────────────────────────────────────
         if ($discount->isPersonal) {
-            // MÃ CÁ NHÂN (thưởng lên hạng) — chỉ đúng chủ mới dùng được
             if (!$user) {
                 return response()->json(['success' => false, 'message' => 'Mã giảm giá không hợp lệ.']);
             }
@@ -314,7 +355,6 @@ class OrderController extends Controller
                 return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã giảm giá này rồi.']);
             }
         } else {
-            // MÃ CÔNG KHAI (sự kiện) — kiểm tra giới hạn tổng lượt và mỗi user
             $usedTotal = UserDiscount::where('discountID', $discount->discountID)
                 ->where('isUsed', true)
                 ->count();

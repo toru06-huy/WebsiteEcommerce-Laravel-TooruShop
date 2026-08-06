@@ -119,12 +119,15 @@ Route::prefix('')->name('client.')->group(function () {
      Route::post('dang-ky',   [ClientAuthController::class, 'register'])->name('register.post');
      Route::post('dang-xuat', [ClientAuthController::class, 'logout'])->name('logout');
 
-     Route::get('trang-ca-nhan/{userID}', [ClientUserController::class, 'show'])->name('profile');
-     Route::put('trang-ca-nhan/{userID}', [ClientUserController::class, 'update'])->name('profile.update');
-     Route::put('trang-ca-nhan/{userID}/mat-khau', [ClientUserController::class, 'updatePassword'])->name('profile.password');
-     Route::get('trang-ca-nhan/{userID}/don-hang', [ClientUserController::class, 'orders'])->name('profile.orders');
-     Route::get('trang-ca-nhan/don-hang/{orderID}', [ClientUserController::class, 'orderDetails'])->name('profile.orderDetails');
-     Route::get('trang-ca-nhan/{userID}/ma-giam-gia', [ClientUserController::class, 'vouchers'])->name('profile.vouchers');
+     Route::middleware('user')->group(function () {
+          Route::get('trang-ca-nhan/{userID}', [ClientUserController::class, 'profile'])->name('user.profile');
+          Route::get('trang-ca-nhan/{userID}/don-hang', [ClientUserController::class, 'orders'])->name('user.orders');
+          Route::get('trang-ca-nhan/{userID}/don-hang/{orderId}', [ClientUserController::class, 'orderDetail'])->name('user.order.detail');
+          Route::get('trang-ca-nhan/{userID}/thong-tin', [ClientUserController::class, 'editProfile'])->name('user.editProfile');
+          Route::post('trang-ca-nhan/{userID}/thong-tin', [ClientUserController::class, 'updateProfile'])->name('user.updateProfile');
+          Route::get('trang-ca-nhan/{userID}/doi-mat-khau', [ClientUserController::class, 'changePasswordForm'])->name('user.changePasswordForm');
+          Route::post('trang-ca-nhan/{userID}/doi-mat-khau', [ClientUserController::class, 'changePassword'])->name('user.changePassword');
+     });
 
      Route::get('vong-quay-may-man',       [MinigameController::class, 'index'])->name('minigame.index');
      Route::post('vong-quay-may-man/quay', [MinigameController::class, 'spin'])->name('minigame.spin');

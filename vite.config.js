@@ -20,10 +20,11 @@ export default defineConfig({
                 'resources/css/client/minigame.css',
                 'resources/css/client/checkout/payment.css',
                 'resources/css/client/checkout/shipping.css',
-                
+    
                 'resources/css/client/auth/login.css',
                 'resources/css/client/auth/register.css',
                 'resources/css/client/auth/verify-email.css',
+                'resources/css/manufacturer/restock.css'
             ],
 
             refresh: true,
